@@ -2,68 +2,71 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "sintatico.tab.h" // nome que o bison gerar
 %}
 
 %option noyywrap
 
 %%
 
-"intche"              { printf("<INT> "); }
-"MOSTRE TCHE"         { printf("<PRINT> "); }
-"DIGA GURI"           { printf("<SCAN> "); }
-"SEGUE NA PELEIA"     { printf("<WHILE> "); }
-"CHEGA DE PELEIA"     { printf("<BREAK> "); }
-"BAH MAS SERA QUE"    { printf("<IF> "); }
-"CAPAZ"               { printf("<ELSE> "); }
-"FIM DA PICADA"       { printf("<RETURN> "); }
+"intche"              { return INT; }
+"MOSTRE TCHE"         { return PRINT; }
+"DIGA GURI"           { return SCAN; }
+"SEGUE NA PELEIA"     { return WHILE; }
+"CHEGA DE PELEIA"     { return BREAK; }
+"BAH MAS SERA QUE"    { return IF; }
+"CAPAZ"               { return ELSE; }
+"FIM DA PICADA"       { return RETURN; }
+"TROTEANDO"			  { return FOR; }
 
-"+"                   { printf("<MAIS> "); }
-"-"                   { printf("<MENOS> "); }
-"=="                  { printf("<IGUAL> "); }
-"="                   { printf("<ATRIB> "); }
-"!="                  { printf("<DIFERENTE> "); }
-"<"                   { printf("<MENORQUE> "); }
-">"                   { printf("<MAIORQUE> "); }
-"<="                  { printf("<MENORIGUALQUE> "); }
-">="                  { printf("<MAIORIGUALQUE> "); }
-"%"                   { printf("<MOD> "); }
-"("                   { printf("<LPAR> "); }
-")"                   { printf("<RPAR> "); }
-";"                   { printf("<PEV> "); }
-"/"                   { printf("<DIV> "); }
-"*"                   { printf("<MULT> "); }
-"&&"                  { printf("<AND> "); }
-"||"                  { printf("<OR> "); }
-"!"                   { printf("<NOT> "); }
-"++"                  { printf("<MAISMAIS> "); }
-"--"                  { printf("<MENOSMENOS> "); }
-"{"                   { printf("<RCHAVES> "); }
-"}"                   { printf("<LCHAVES> "); }
-"["                   { printf("<RCOLCHETES> "); }
-"]"                   { printf("<LCOLCHETES> "); }
-","                   { printf("<VIRGULA> "); }
-"\""                  { printf("<ASPASDUPLAS> "); }
+"'"					  { return APOSTROF; }
+"+"                   { return MAIS; }
+"-"                   { return MENOS; }
+"=="                  { return IGUAL; }
+"="                   { return ATRIB; }
+"!="                  { return DIFERENTE; }
+"<"                   { return MENORQUE; }
+">"                   { return MAIORQUE; }
+"<="                  { return MENORIGUALQUE; }
+">="                  { return MAIORIGUALQUE; }
+"%"                   { return MOD; }
+"("                   { return LPAR; }
+")"                   { return RPAR; }
+";"                   { return PEV; }
+"/"                   { return DIV; }
+"*"                   { return MULT; }
+"&&"                  { return AND; }
+"||"                  { return OR; }
+"!"                   { return NOT; }
+"++"                  { return MAISMAIS; }
+"--"                  { return MENOSMENOS; }
+"{"                   { return LCHAVES; }
+"}"                   { return RCHAVES; }
+"["                   { return LCOLCHETES; }
+"]"                   { return RCOLCHETES; }
+","                   { return VIRGULA; }
+"\""[^"]*"\""    {yylval.string = strdup(yytext);return STRING;}  
 
-[0-9]+                { printf("<NUM: \"%s\"> ", yytext); }
--?[0-9]+              { printf("<NUM: \"%s\"> ", yytext); }
+-?[0-9]+              { yylval.inteiro = atoi(yytext); return NUM; }
 
-[a-zA-Z][a-zA-Z0-9_]* { printf("<ID: \"%s\"> ", yytext); }
+[a-zA-Z][a-zA-Z0-9_]* { yylval.string = strdup(yytext); return ID; }
 
-"//".*"\n" { }
+"//".* {}
 " " {}
-"\t" {}
 "\n" {}
+"\t" {}
 "\0" {}
 "\a" {}
 "\b" {}
 "\f" {}
 "\r" {}
 
-.                      { fprintf(stderr, "Caractere inválido encontrado %s\n", yytext); }
+.                      { fprintf(stderr, "Caractere inválido encontrado (ERRO LEXICO) %s\n", yytext);  return ERROR;}
 %%
 
 extern FILE *yyin;
 
+/*
 int main(int argc, char *argv[]) {
 	if (argc > 1) {
 		yyin = fopen(argv[1], "r");
@@ -75,3 +78,4 @@ int main(int argc, char *argv[]) {
 	if (yyin && yyin != stdin) fclose(yyin);
 	return 0;
 }
+*/
