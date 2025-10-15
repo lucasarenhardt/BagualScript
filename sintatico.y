@@ -7,7 +7,7 @@ typedef struct{ // auxilia em expressoes logicas complexas (AND/OR)
     // registradores temporarios (r3 = r3(resultado de outra operacao)) OR r2(result. de outra operacao))
     int r1;
     int r2;
-    int r2;
+    int r3;
 }logicas;
 
 typedef struct{ // guarda as declaracoes de variavel
@@ -44,14 +44,14 @@ int idx_else = 0; //proxima posicao livre
 
 void popLogicas(int r1){ // gera o codigo para um op logica (AND/OR)
     //imprime a instrucao
-    printf("%s %%t%d, %%t%d, %%t%d \n", tabLogicas[idx_logicas].operador, r1+1, tabela[idx_logicas].r2, r1);
+    printf("%s %%t%d, %%t%d, %%t%d \n", tabLogicas[idx_logicas].operador, r1+1, tabLogicas[idx_logicas].r2, r1);
 }
 
 int capturaEnd(char *nome){
     for(int i=0; i<idx_entradas; i++){
-        int retorno = strcmp(tabEntrada[i].nome, nome) // se o nome for igual o da tabela retorna 0
+        int retorno = strcmp(tabEntrada[i].nome, nome); // se o nome for igual o da tabela retorna 0
         if(!retorno){ // encontrado 
-            return tabEntrada[i].end;
+            return tabEntrada[i].endereco;
         }
     }
     return -1; // caso nao encontre
@@ -131,7 +131,7 @@ codigo: atrib codigo
       | If codigo
       | pegarEtrada codigo
       | BREAK PEV { printf("jump R0%d\n", pilhaCond[topoCond - 1]); }
-      | ERRO  
+      | ERROR
       | ;             
                           
 // regra para scan de valores do teclado

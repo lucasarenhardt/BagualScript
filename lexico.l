@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-// #include "parser-bison.tab.h" // nome que o bison gerar
+#include "sintatico.tab.h" // nome que o bison gerar
 %}
 
 %option noyywrap
@@ -55,7 +55,6 @@
 " " {}
 "\n" {}
 "\t" {}
-"\n" {}
 "\0" {}
 "\a" {}
 "\b" {}
