@@ -1,0 +1,19 @@
+mov %t0, 0
+mov %r-1, %t0
+label R00
+mov %t1, 20
+less %t2, %r-1, %t1
+jf %t2, R01
+mov %t3, %r-1
+mov %t4, 10
+equal %t5, %t3, %t4
+jf %t5, R02
+printf "X igual a 5\n"
+jump R01
+jump R03
+label R02
+printf "x diferente de 5\n"
+label R03
+add %r-1, %r-1, 1
+jump R00
+label R01

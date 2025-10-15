@@ -2,6 +2,11 @@
 #include <string.h>
 #include <stdio.h>
 
+typedef struct{ // guarda as declaracoes de variavel
+    char *nome; // nome da variavel 
+    int endereco;// endereco na memoria simulada
+}entrada;
+
 typedef struct{ // auxilia em expressoes logicas complexas (AND/OR)
     char *operador; // AND/OR
     // registradores temporarios (r3 = r3(resultado de outra operacao)) OR r2(result. de outra operacao))
@@ -10,16 +15,10 @@ typedef struct{ // auxilia em expressoes logicas complexas (AND/OR)
     int r3;
 }logicas;
 
-typedef struct{ // guarda as declaracoes de variavel
-    char *nome; // nome da variavel 
-    char endereco;// endereco na memoria simulada
-}entrada;
+// declaracao de variaveis necessarias para o cpl durante a analise
 
-
-// delcaracao de variaveis necessarias para o cpl durante a analise
-
-entrada tabEntrada[25000]; // armazena todas as variaveis declaradas no codigo
 logicas tabLogicas[1000]; // armazena as expressoes logicas do codigo
+entrada tabEntrada[25000]; // armazena todas as variaveis declaradas no codigo
 
 int idx_entradas = 0; // contador para o nmr de entradas (variaveis) atualmente na tabela
 int end = 0; // contador para simular o prox endereco de memoria livre a ser alocado
@@ -27,8 +26,11 @@ int idx_logicas = 0; // indice para a prox pos livre no vetor de 'logicas'
 
 int cplx = -1; // flag para indicar se uma logica complexa (AND/OR) esta sendo analisada
 
-int pilhaCond[300]; // pilha paar gerenciar desvio (lacos e condicionais)
+int pilhaCond[300]; // pilha para gerenciar desvio (lacos e condicionais)
 int topoCond = 0;
+
+int pilhaLoop[300]; // pilha para gerenciar BREAK (só loops)
+int topoLoop = 0;
 
 int pilhaPar[300]; // pilha para ordem de avaliacao de expressoes com "()"
 int topoPar = 0;
@@ -70,7 +72,7 @@ void pushPilhaPAR(int x){
 
 // desempilha na pilhaPar
 int popPilhaPAR(){
-    if(topoPar==0){ // pilha vazia
+    if(topoPar <= 0){ // pilha vazia
         printf("Pilha expressoes com () vazia\n");
         return 0; 
     }
@@ -91,13 +93,32 @@ void pushPilhaCOND(int x){
 
 // desempilha da pilha COND
 int popPilhaCOND(){
-    if(topoCond==0){ // verifica se não esta vazia
-        topoCond++;
-        printf("Pilha de desvios condicionais e lacos cheia\n");
+    if(topoCond<=0){ // verifica se não esta vazia
+        printf("Pilha de desvios condicionais e lacos vazia\n");
         return 0;
     }
     topoCond--;
     return pilhaCond[topoCond];
+}
+
+// empilha x na pilhaLoop (para BREAK)
+void pushPilhaLoop(int x){
+    if(topoLoop>=300){
+        printf("Pilha de loops cheia\n");
+        return;
+    }
+    pilhaLoop[topoLoop] = x;
+    topoLoop++;
+}
+
+// desempilha da pilha Loop
+int popPilhaLoop(){
+    if(topoLoop<=0){
+        printf("Pilha de loops vazia\n");
+        return 0;
+    }
+    topoLoop--;
+    return pilhaLoop[topoLoop];
 }
 
 %}
@@ -117,8 +138,10 @@ int popPilhaCOND(){
 %token  MAISMAIS MENOSMENOS MENORQUE MAIORQUE IGUAL DIFERENTE MAIORIGUALQUE MENORIGUALQUE 
 %token MAIS MENOS LPAR RPAR RCOLCHETES LCOLCHETES LCHAVES RCHAVES MULT MOD AND NOT OR DIV BREAK APOSTROF
 
-%type <int_val> expressao term expressao1 logicas
-%type <str_val> oper AO increm forVar lacoFor parteIncrem
+%type <inteiro> expressao term expressao1 logicas
+%type <string> oper AO increm forVar lacoFor parteIncrem
+
+%define parse.error verbose
 
 %%
 // regras gramaticais
@@ -129,13 +152,13 @@ codigo: atrib codigo
       | lacoWhile codigo
       | exibir codigo
       | If codigo
-      | pegarEtrada codigo
-      | BREAK PEV { printf("jump R0%d\n", pilhaCond[topoCond - 1]); }
+      | pegarEntrada codigo
+      | BREAK PEV { printf("jump R0%d\n", pilhaLoop[topoLoop - 1]); }
       | ERROR
       | ;             
                           
 // regra para scan de valores do teclado
-pegarEtrada : SCAN LPAR ID RPAR {int endereco_var = capturaEnd($3); printf("read %%r%d\n", endereco_var);} PEV 
+pegarEntrada : SCAN LPAR ID RPAR {int endereco_var = capturaEnd($3); printf("read %%r%d\n", endereco_var);} PEV 
         | SCAN LPAR ID LCOLCHETES expressao {int endereco_var = capturaEnd($3); printf("read %%t%d\nstore %%t%d, %%t%d(%d)\n", t, t, $5, endereco_var); t++;} RCOLCHETES RPAR PEV;          
              
 // regra para o comando de impressao
@@ -148,14 +171,14 @@ print : expressao {printf("printv %%t%d \n",$1);} VIRGULA print
        | STRING {printf("printf %s\n",$1);};
 
 // regra para atribuicoes e declaracoes de variaveis
-atrib : INT ID ATRIB expressao PEV {printf("mov %%r%d, %%t%d\n", capturaEnd($2), $4);} 
+atrib : INT ID ATRIB expressao PEV {tabEntrada[idx_entradas] = (entrada){$2, end}; printf("mov %%r%d, %%t%d\n", end, $4); idx_entradas++; end++;} 
       | INT ID PEV {tabEntrada[idx_entradas] = (entrada){$2, end}; idx_entradas++; end++;}
       | ID ATRIB expressao PEV {printf("mov %%r%d, %%t%d\n", capturaEnd($1), $3);} 
       | INT ID LCOLCHETES NUM {tabEntrada[idx_entradas] = (entrada){$2, end}; idx_entradas++; end += $4;} RCOLCHETES PEV
-      | ID LCOLCHETES expressao RCOLCHETES ATRIB expressao {int endereco_var = capturaEnd($1); printf("store %%t%d, %%t%d(%d)\n", t-1, $3, endereco_var);} PEV;    
+      | ID LCOLCHETES expressao RCOLCHETES ATRIB expressao {int endereco_var = capturaEnd($1); printf("store %%t%d, %%t%d(%d)\n", $6, $3, endereco_var);} PEV;    
 
 // regra principal para a estrutura do laco 'for'
-lacoFor : FOR LPAR atrib {nmr_jumpFalse = desvio+1; printf("label R0%d\n", desvio); pushPilhaCOND(desvio++); pushPilhaCOND(desvio++);} forVar PEV parteIncrem RPAR LCHAVES codigo RCHAVES {int endereco_var = capturaEnd($5); printf("add %%r%d, %%r%d, 1\n", endereco_var, endereco_var); printf("jump R0%d\nlabel R0%d\n", popPilhaCOND(), popPilhaCOND());}; 
+lacoFor : FOR LPAR atrib {nmr_jumpFalse = desvio+1; printf("label R0%d\n", desvio); pushPilhaCOND(desvio++); pushPilhaCOND(desvio); pushPilhaLoop(desvio++);} forVar PEV parteIncrem RPAR LCHAVES codigo RCHAVES {int endereco_var = capturaEnd($5); printf("add %%r%d, %%r%d, 1\n", endereco_var, endereco_var); popPilhaLoop(); printf("jump R0%d\nlabel R0%d\n", popPilhaCOND(), popPilhaCOND());}; 
 
 // regra para a condição de parada do 'for'
 forVar : ID oper expressao {int endereco_var = capturaEnd($1); printf("%s %%t%d, %%r%d, %%t%d\njf %%t%d, R0%d\n", $2, t, endereco_var, $3, t, nmr_jumpFalse); $$=$1; t++;};
@@ -165,7 +188,7 @@ parteIncrem : increm ID {$$ = $2;}
             | ID increm {$$ = $1;};        
         
 // regra para a estrutura do laco 'while'
-lacoWhile : WHILE {nmr_jumpFalse = desvio+1; printf("label R0%d \n", desvio); pushPilhaCOND(desvio++); pushPilhaCOND(desvio++);} LPAR logicas {printf("jf %%t%d, R0%d\n", t, nmr_jumpFalse); t++;} RPAR LCHAVES codigo RCHAVES {printf("jump R0%d\nlabel R0%d\n", popPilhaCOND(), popPilhaCOND());};
+lacoWhile : WHILE {nmr_jumpFalse = desvio+1; printf("label R0%d \n", desvio); pushPilhaCOND(desvio++); pushPilhaCOND(desvio); pushPilhaLoop(desvio++);} LPAR logicas {printf("jf %%t%d, R0%d\n", t, nmr_jumpFalse); t++;} RPAR LCHAVES codigo RCHAVES {popPilhaLoop(); printf("jump R0%d\nlabel R0%d\n", popPilhaCOND(), popPilhaCOND());};
 
 // regra para a estrutura condicional 'if'
 If : IF {nmr_jumpFalse = desvio; pushPilhaCOND(desvio++); pushPilhaCOND(desvio++);} LPAR logicas {printf("jf %%t%d, R0%d\n", t, nmr_jumpFalse); t++;} RPAR LCHAVES codigo RCHAVES else ;
@@ -175,12 +198,12 @@ else : ELSE {dest_else[idx_else++] = popPilhaCOND(); printf("jump R0%d\n", dest_
      | { int x = popPilhaCOND(); printf("jump R0%d\n", x); printf("label R0%d\nlabel R0%d\n", popPilhaCOND(), x);};
 
 // regra para expressoes logicas de comparacao
-logicas : expressao oper expressao AO {printf("%s %%t%d, %%t%d, %%t%d\n", $2, t, $1, $3); tabLogicas[idx_logicas].r2 = t; t++; tabLogicas[idx_logicas].operador = $4; cplx=0;} logicas  
-        | expressao oper expressao {printf("%s %%t%d, %%t%d, %%t%d\n", $2, t, $1, $3); pushPilhaPAR(t); if(cplx != -1){ popLogicas(t); t++; }; cplx=0;} 
+logicas : expressao oper expressao AO {printf("%s %%t%d, %%t%d, %%t%d\n", $2, t, $1, $3); tabLogicas[idx_logicas].r2 = t; t++; tabLogicas[idx_logicas].operador = $4; idx_logicas++; cplx=0;} logicas  
+        | expressao oper expressao {printf("%s %%t%d, %%t%d, %%t%d\n", $2, t, $1, $3); pushPilhaPAR(t); if(cplx == 0){ popLogicas(t); idx_logicas--; t++; }; cplx=-1;} 
         | LPAR logicas RPAR AO logicas {printf("%s %%t%d, %%t%d, %%t%d \n", $4, t, popPilhaPAR(), popPilhaPAR()); $$ = $2;}
         | LPAR logicas RPAR {$$ = $2;};
            
-// regra que converte tokens de operadores de comparacaoo em strings
+// regra que converte tokens de operadores de comparacao em strings
 oper : MAIORQUE {$$ = "greater";}       
      | MENORQUE {$$ = "less";}
      | IGUAL {$$ = "equal";}
