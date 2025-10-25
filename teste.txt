@@ -1,3 +1,5 @@
+intche x;
+
 TROTEANDO (x = 0 ; x < 20 ; x ++) {
 	BAH MAS SERA QUE ( x == 10 ) {
 		MOSTRE TCHE ("x igual a 5\n") ;
