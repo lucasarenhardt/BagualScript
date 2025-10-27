@@ -225,14 +225,7 @@ print : expressao {printf("printv %%t%d \n",$1);} VIRGULA print
        | STRING {printf("printf %s\n",$1);} VIRGULA print
        | expressao {printf("printv %%t%d \n",$1);}
        | STRING {printf("printf %s\n",$1);};
-/*
-// regra para atribuicoes e declaracoes de variaveis
-atrib : INT ID ATRIB expressao PEV {verificaDeclaracao($2); tabEntrada[idx_entradas] = (entrada){$2, end}; printf("mov %%r%d, %%t%d\n", end, $4); idx_entradas++; end++;} 
-      | INT ID PEV {verificaDeclaracao($2); tabEntrada[idx_entradas] = (entrada){$2, end}; idx_entradas++; end++;}
-      | ID ATRIB expressao PEV {printf("mov %%r%d, %%t%d\n", buscaEValidaUso($1), $3);} 
-      | INT ID LCOLCHETES NUM {tabEntrada[idx_entradas] = (entrada){$2, end}; idx_entradas++; end += $4;} RCOLCHETES PEV
-      | ID LCOLCHETES expressao RCOLCHETES ATRIB expressao {verificaDeclaracao($3); int endereco_var = buscaEValidaUso($1); printf("store %%t%d, %%t%d(%d)\n", $6, $3, endereco_var);} PEV;  
-*/
+
 
 // regra para atribuicoes e declaracoes de variaveis
 atrib : INT ID ATRIB expressao PEV 
