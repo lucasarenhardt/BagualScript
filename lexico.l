@@ -16,7 +16,6 @@
 "CHEGA DE PELEIA"     { return BREAK; }
 "BAH MAS SERA QUE"    { return IF; }
 "CAPAZ"               { return ELSE; }
-"FIM DA PICADA"       { return RETURN; }
 "TEMO LACEANDO"		  { return FOR; }
 
 "'"					  { return APOSTROF; }
