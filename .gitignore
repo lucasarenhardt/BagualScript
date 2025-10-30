@@ -51,3 +51,10 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+analisador
+bison.tab.c
+bison.tab.h
+lex.yy.c
+raposeitor
+teste.rap

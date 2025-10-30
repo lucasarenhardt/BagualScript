@@ -4,12 +4,12 @@ intche i = 0;
 intche j = 0;
 intche chave = 0;
 
-TROTEANDO (i = 0; i < N; i++){
+TEMO LACEANDO (i = 0; i < N; i++){
     MOSTRE TCHE ("Digite o valor ", i+1, ": ");
     DIGA GURI (vetor[i]);
 }
 
-TROTEANDO (i = 1; i < N; i++){
+TEMO LACEANDO (i = 1; i < N; i++){
     chave = vetor[i];
     j = i - 1;
 
@@ -22,7 +22,7 @@ TROTEANDO (i = 1; i < N; i++){
 }
 
 MOSTRE TCHE ("Vetor ordenado: ");
-TROTEANDO (intche k = 0; k < N; k++){
+TEMO LACEANDO (intche k = 0; k < N; k++){
     MOSTRE TCHE (vetor[k], " ");
 }
 MOSTRE TCHE ("\n");

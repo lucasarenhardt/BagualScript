@@ -2,17 +2,17 @@ intche vetor[3];
 
 intche i = 0;
 
-TROTEANDO (i=0; i<3; i++){
+TEMO LACEANDO (i=0; i<3; i++){
     MOSTRE TCHE ("INSIRA O ", i+1, "° NUMERO: ");
     DIGA GURI (vetor[i]);
 }
 
 intche maior = vetor[0];
 
-TROTEANDO (i=0; i<2; i++){
+TEMO LACEANDO (i=0; i<2; i++){
 	BAH MAS SERA QUE (maior < vetor[i+1]){
 		maior = vetor[i+1];
 	}
 }
 
-MOSTRE TCHE ("O MAIOR É: ", maior, "\n");
+MOSTRE TCHE ("O MAIOR EH: ", maior, "\n");

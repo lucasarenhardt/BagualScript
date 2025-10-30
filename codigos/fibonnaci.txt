@@ -8,7 +8,7 @@ intche temp = 0;
 
 MOSTRE TCHE ("Sequência de Fibonacci até ", limite, ": ");
 
-TROTEANDO (intche i = 0; a <= limite; i++){
+TEMO LACEANDO (intche i = 0; a <= limite; i++){
     MOSTRE TCHE (a, " ");
     temp = a + b;
     a = b;

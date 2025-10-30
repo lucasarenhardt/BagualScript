@@ -17,7 +17,7 @@
 "BAH MAS SERA QUE"    { return IF; }
 "CAPAZ"               { return ELSE; }
 "FIM DA PICADA"       { return RETURN; }
-"TROTEANDO"			  { return FOR; }
+"TEMO LACEANDO"		  { return FOR; }
 
 "'"					  { return APOSTROF; }
 "+"                   { return MAIS; }
