@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "sintatico.tab.h" // nome que o bison gerar
+#include "bison.tab.h" // nome que o bison gerar
 %}
 
 %option noyywrap
@@ -61,7 +61,7 @@
 "\f" {}
 "\r" {}
 
-.                      { fprintf(stderr, "Caractere inválido encontrado (ERRO LEXICO) %s\n", yytext);  return ERROR;}
+.                      { fprintf(stderr, "ERRO LEXICO! Caractere inválido encontrado: %s\n", yytext);  return ERROR;}
 %%
 
 extern FILE *yyin;
