@@ -223,7 +223,7 @@ atrib: INT ID ATRIB expressao PEV {
            idx_entradas++;
            end++;
        }
-     | ID ATRIB expressao PEV { // Ex: x = 5;
+     | ID ATRIB expressao PEV {
            // verificacao semantica (uso de variavel simples)
            // verifica se $1 existe e eh uma variavel simples
            int endereco_var = buscaEValidaVariavelSimples($1);
@@ -242,7 +242,7 @@ atrib: INT ID ATRIB expressao PEV {
        }
        RCOLCHETES PEV
      | ID LCOLCHETES expressao RCOLCHETES ATRIB expressao PEV {
-           // ve se $1 existe e eh um vetor.
+           // ve se $1 existe e eh um vetor
            int endereco_var = buscaEValidaVetor($1);
 
            // $3 é o índice, $6 é o valor
