@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int yylex(void); 
-void yyerror(const char *s); 
+int yylex(void);
+void yyerror(const char *s);
 int capturaEnd(char *nome);
 
 typedef enum {
@@ -12,11 +12,11 @@ typedef enum {
     ID_VETOR
 } TipoID;
 
-typedef struct{ // guarda as declaracoes de variavel
-    char *nome; // nome da variavel 
-    int endereco;// endereco na memoria simulada
+typedef struct { // guarda as declaracoes de variavel
+    char *nome; // nome da variavel
+    int endereco; // endereco na memoria simulada
     TipoID tipo; // Identificar se é var ou vetor
-}entrada;
+} entrada;
 
 // declaracao de variaveis necessarias para o cpl durante a analise
 
@@ -48,11 +48,10 @@ void verificaDeclaracao(char *nome) {
     }
 }
 
-
 // FUNÇÃO SEMÂNTICA : Verifica se é uma VARIAVEL SIMPLES declarada.
 int buscaEValidaVariavelSimples(char *nome) {
-    for(int i=0; i<idx_entradas; i++){
-        if(strcmp(tabEntrada[i].nome, nome) == 0){ // Achou o nome
+    for (int i = 0; i < idx_entradas; i++) {
+        if (strcmp(tabEntrada[i].nome, nome) == 0) { // Achou o nome
             // VERIFICAÇÃO DE TIPO:
             if (tabEntrada[i].tipo != ID_VARIAVEL_SIMPLES) {
                 fprintf(stderr, "ERRO SEMANTICO: '%s' é um vetor e foi usado como variavel simples.\n", nome);
@@ -63,14 +62,14 @@ int buscaEValidaVariavelSimples(char *nome) {
     }
     // Se saiu do loop, não achou
     fprintf(stderr, "ERRO SEMANTICO: Variavel '%s' nao foi declarada\n", nome);
-    exit(1); 
+    exit(1);
     return -1; // (só para o compilador não reclamar)
 }
 
 // FUNÇÃO SEMÂNTICA : Verifica se é um VETOR declarado.
 int buscaEValidaVetor(char *nome) {
-    for(int i=0; i<idx_entradas; i++){
-        if(strcmp(tabEntrada[i].nome, nome) == 0){ // Achou o nome
+    for (int i = 0; i < idx_entradas; i++) {
+        if (strcmp(tabEntrada[i].nome, nome) == 0) { // Achou o nome
             // VERIFICAÇÃO DE TIPO:
             if (tabEntrada[i].tipo != ID_VETOR) {
                 fprintf(stderr, "ERRO SEMANTICO: '%s' é uma variavel simples e foi usada como vetor.\n", nome);
@@ -81,15 +80,15 @@ int buscaEValidaVetor(char *nome) {
     }
     // Se saiu do loop, não achou
     fprintf(stderr, "ERRO SEMANTICO: Vetor '%s' nao foi declarado\n", nome);
-    exit(1); 
+    exit(1);
     return -1;
 }
 
 
-int capturaEnd(char *nome){
-    for(int i=0; i<idx_entradas; i++){
+int capturaEnd(char *nome) {
+    for (int i = 0; i < idx_entradas; i++) {
         int retorno = strcmp(tabEntrada[i].nome, nome); // se o nome for igual o da tabela retorna 0
-        if(!retorno){ // encontrado 
+        if (!retorno) { // encontrado
             return tabEntrada[i].endereco;
         }
     }
@@ -97,19 +96,19 @@ int capturaEnd(char *nome){
 }
 
 // empilha x na pilhaCOND (desvios condiconais e lacos)
-void pushPilhaCOND(int x){
-    if(topoCond>=300){ // verifica se a pilha esta cheia
+void pushPilhaCOND(int x) {
+    if (topoCond >= 300) { // verifica se a pilha esta cheia
         printf("Pilha de desvios condicionais e lacos cheia\n");
         return;
     }
-    // coloca x no topo e incrementa o topo 
-    pilhaCond[topoCond] = x; 
+    // coloca x no topo e incrementa o topo
+    pilhaCond[topoCond] = x;
     topoCond++;
 }
 
 // desempilha da pilha COND
-int popPilhaCOND(){
-    if(topoCond<=0){ // verifica se não esta vazia
+int popPilhaCOND() {
+    if (topoCond <= 0) { // verifica se não esta vazia
         printf("Pilha de desvios condicionais e lacos vazia\n");
         return 0;
     }
@@ -118,8 +117,8 @@ int popPilhaCOND(){
 }
 
 // empilha x na pilhaLoop (para BREAK)
-void pushPilhaLoop(int x){
-    if(topoLoop>=300){
+void pushPilhaLoop(int x) {
+    if (topoLoop >= 300) {
         printf("Pilha de loops cheia\n");
         return;
     }
@@ -128,8 +127,8 @@ void pushPilhaLoop(int x){
 }
 
 // desempilha da pilha Loop
-int popPilhaLoop(){
-    if(topoLoop<=0){
+int popPilhaLoop() {
+    if (topoLoop <= 0) {
         printf("Pilha de loops vazia\n");
         return 0;
     }
@@ -140,8 +139,8 @@ int popPilhaLoop(){
 %}
 
 // tipos de dados que vao ser associados a um token ou regra
-%union{
-    char *string; 
+%union {
+    char *string;
     int inteiro;
 }
 
@@ -151,9 +150,10 @@ int popPilhaLoop(){
 %token <inteiro> NUM
 // tokens que são simbolos e não possuem valor extra
 %token PEV FOR WHILE IF ELSE INT PRINT VIRGULA SCAN ERROR ATRIB
-%token  MAISMAIS MENOSMENOS MENORQUE MAIORQUE IGUAL DIFERENTE MAIORIGUALQUE MENORIGUALQUE 
+%token MAISMAIS MENOSMENOS MENORQUE MAIORQUE IGUAL DIFERENTE MAIORIGUALQUE MENORIGUALQUE
 %token MAIS MENOS LPAR RPAR RCOLCHETES LCOLCHETES LCHAVES RCHAVES MULT MOD AND NOT OR DIV BREAK APOSTROF
 
+// tipos de retorno dos símbolos não-terminais
 %type <inteiro> expressao term expressao1 logicas logica_and logica_not logica_base
 %type <string> oper increm forVar lacoFor parteIncrem
 
@@ -164,8 +164,8 @@ int popPilhaLoop(){
 %left AND
 %right NOT
 
-%nonassoc "then"  // Marcador para um IF sem ELSE
-%nonassoc ELSE    // IF ... ELSE
+%nonassoc "then" // Marcador para um IF sem ELSE
+%nonassoc ELSE // IF ... ELSE
 
 %%
 // regras gramaticais
@@ -175,191 +175,274 @@ codigo: atrib codigo
       | lacoFor codigo
       | lacoWhile codigo
       | exibir codigo
-      | If codigo          
+      | If codigo
       | pegarEntrada codigo
       | BREAK PEV { printf("jump R0%d\n", pilhaLoop[topoLoop - 1]); }
       | ERROR
-      | ;                  
-                    
+      | ;
+
 // regra para scan de valores do teclado
-pegarEntrada : SCAN LPAR ID RPAR {int endereco_var = buscaEValidaVariavelSimples($3); printf("read %%r%d\n", endereco_var);} PEV 
-        | SCAN LPAR ID LCOLCHETES expressao {int endereco_var = buscaEValidaVetor($3); printf("read %%t%d\nstore %%t%d, %%t%d(%d)\n", t, t, $5, endereco_var); t++;} RCOLCHETES RPAR PEV;          
-                  
+pegarEntrada: SCAN LPAR ID RPAR {
+                int endereco_var = buscaEValidaVariavelSimples($3);
+                printf("read %%r%d\n", endereco_var);
+            } PEV
+            | SCAN LPAR ID LCOLCHETES expressao {
+                int endereco_var = buscaEValidaVetor($3);
+                printf("read %%t%d\nstore %%t%d, %%t%d(%d)\n", t, t, $5, endereco_var);
+                t++;
+            } RCOLCHETES RPAR PEV;
+
 // regra para o comando de impressao
-exibir : PRINT LPAR print RPAR PEV ;
+exibir: PRINT LPAR print RPAR PEV ;
 
 // regra para os argumentos do comando de impressao
-print : expressao {printf("printv %%t%d \n",$1);} VIRGULA print
-       | STRING {printf("printf %s\n",$1);} VIRGULA print
-       | expressao {printf("printv %%t%d \n",$1);}
-       | STRING {printf("printf %s\n",$1);};
-
+print: expressao { printf("printv %%t%d \n", $1); } VIRGULA print
+     | STRING { printf("printf %s\n", $1); } VIRGULA print
+     | expressao { printf("printv %%t%d \n", $1); }
+     | STRING { printf("printf %s\n", $1); };
 
 // regra para atribuicoes e declaracoes de variaveis
-atrib : INT ID ATRIB expressao PEV 
-          {
-              // Verificação Semântica (Declaração Duplicada)
-              verificaDeclaracao($2); 
+atrib: INT ID ATRIB expressao PEV {
+           // Verificação Semântica (Declaração Duplicada)
+           verificaDeclaracao($2);
 
-              // Ação na Tabela (Adiciona com o tipo simples)
-              tabEntrada[idx_entradas] = (entrada){$2, end, ID_VARIAVEL_SIMPLES}; 
-              
-              // Geração de Código
-              printf("mov %%r%d, %%t%d\n", end, $4); 
-              idx_entradas++; 
-              end++;
-          }
-      | INT ID PEV 
-          {
-              // Verificação Semântica (Declaração Duplicada)
-              verificaDeclaracao($2); 
+           // Ação na Tabela (Adiciona com o tipo simples)
+           tabEntrada[idx_entradas] = (entrada){$2, end, ID_VARIAVEL_SIMPLES};
 
-              // Ação na Tabela (Adiciona com o tipo simples)
-              tabEntrada[idx_entradas] = (entrada){$2, end, ID_VARIAVEL_SIMPLES}; 
-              idx_entradas++; 
-              end++;
-          }
-      | ID ATRIB expressao PEV // Ex: x = 5;
-          {
-              // Verificação Semântica (Uso de Variável Simples)
-              // Verifica se $1 existe E é uma variável simples.
-              int endereco_var = buscaEValidaVariavelSimples($1);
+           // Geração de Código
+           printf("mov %%r%d, %%t%d\n", end, $4);
+           idx_entradas++;
+           end++;
+       }
+     | INT ID PEV {
+           // Verificação Semântica (Declaração Duplicada)
+           verificaDeclaracao($2);
 
-              // Geração de Código
-              printf("mov %%r%d, %%t%d\n", endereco_var, $3);
-          }
-      | INT ID LCOLCHETES NUM // Ex: intche v[10];
-          {
-              // Verificação Semântica (Declaração Duplicada)
-              verificaDeclaracao($2);
+           // Ação na Tabela (Adiciona com o tipo simples)
+           tabEntrada[idx_entradas] = (entrada){$2, end, ID_VARIAVEL_SIMPLES};
+           idx_entradas++;
+           end++;
+       }
+     | ID ATRIB expressao PEV { // Ex: x = 5;
+           // Verificação Semântica (Uso de Variável Simples)
+           // Verifica se $1 existe E é uma variável simples.
+           int endereco_var = buscaEValidaVariavelSimples($1);
 
-              // Ação na Tabela (Adiciona com o tipo vetor)
-              tabEntrada[idx_entradas] = (entrada){$2, end, ID_VETOR}; 
-              idx_entradas++; 
-              end += $4; // Aloca o espaço do vetor
-          } 
-          RCOLCHETES PEV
-      | ID LCOLCHETES expressao RCOLCHETES ATRIB expressao PEV // Ex: v[i] = 10;
-          {
-              // Verifica se $1 existe E é um vetor.
-              int endereco_var = buscaEValidaVetor($1);
-              
-              // $3 é o índice (i), $6 é o valor (10).
-              printf("store %%t%d, %%t%d(%d)\n", $6, $3, endereco_var);
-          }
-;
+           // Geração de Código
+           printf("mov %%r%d, %%t%d\n", endereco_var, $3);
+       }
+     | INT ID LCOLCHETES NUM { // Ex: intche v[10];
+           // Verificação Semântica (Declaração Duplicada)
+           verificaDeclaracao($2);
+
+           // Ação na Tabela (Adiciona com o tipo vetor)
+           tabEntrada[idx_entradas] = (entrada){$2, end, ID_VETOR};
+           idx_entradas++;
+           end += $4; // Aloca o espaço do vetor
+       }
+       RCOLCHETES PEV
+     | ID LCOLCHETES expressao RCOLCHETES ATRIB expressao PEV { // Ex: v[i] = 10;
+           // Verifica se $1 existe E é um vetor.
+           int endereco_var = buscaEValidaVetor($1);
+
+           // $3 é o índice (i), $6 é o valor (10).
+           printf("store %%t%d, %%t%d(%d)\n", $6, $3, endereco_var);
+       }
+     ;
 
 // regra principal para a estrutura do laco 'for'
-lacoFor : FOR LPAR atrib {nmr_jumpFalse = desvio+1;
-printf("label R0%d\n", desvio); pushPilhaCOND(desvio++); pushPilhaCOND(desvio); pushPilhaLoop(desvio++);} forVar PEV parteIncrem RPAR LCHAVES codigo RCHAVES {int R0_end, R0_cond; int endereco_var = buscaEValidaVariavelSimples($7);
-printf("add %%r%d, %%r%d, 1\n", endereco_var, endereco_var); popPilhaLoop(); R0_end = popPilhaCOND(); R0_cond = popPilhaCOND(); printf("jump R0%d\nlabel R0%d\n", R0_cond, R0_end);};
+lacoFor: FOR LPAR atrib {
+             nmr_jumpFalse = desvio + 1;
+             printf("label R0%d\n", desvio);
+             pushPilhaCOND(desvio++);
+             pushPilhaCOND(desvio);
+             pushPilhaLoop(desvio++);
+         } forVar PEV parteIncrem RPAR LCHAVES codigo RCHAVES {
+             int R0_end, R0_cond;
+             int endereco_var = buscaEValidaVariavelSimples($7);
+             printf("add %%r%d, %%r%d, 1\n", endereco_var, endereco_var);
+             popPilhaLoop();
+             R0_end = popPilhaCOND();
+             R0_cond = popPilhaCOND();
+             printf("jump R0%d\nlabel R0%d\n", R0_cond, R0_end);
+         };
 
 // regra para a condição de parada do 'for'
-forVar : ID oper expressao {int endereco_var = buscaEValidaVariavelSimples($1); printf("%s %%t%d, %%r%d, %%t%d\njf %%t%d, R0%d\n", $2, t, endereco_var, $3, t, nmr_jumpFalse); $$=$1; t++;};
+forVar: ID oper expressao {
+            int endereco_var = buscaEValidaVariavelSimples($1);
+            printf("%s %%t%d, %%r%d, %%t%d\njf %%t%d, R0%d\n", $2, t, endereco_var, $3, t, nmr_jumpFalse);
+            $$ = $1;
+            t++;
+        };
 
 // regra para a parte de incremento do 'for'
-parteIncrem : increm ID {$$ = $2;}
-            | ID increm {$$ = $1;};        
-        
+parteIncrem: increm ID { $$ = $2; }
+           | ID increm { $$ = $1; };
+
 // regra para a estrutura do laco 'while'
-lacoWhile : WHILE {nmr_jumpFalse = desvio+1;
-printf("label R0%d \n", desvio); pushPilhaCOND(desvio++); pushPilhaCOND(desvio); pushPilhaLoop(desvio++);} LPAR logicas {printf("jf %%t%d, R0%d\n", $4, nmr_jumpFalse);} RPAR LCHAVES codigo RCHAVES {int R0_end, R0_cond; popPilhaLoop();
-R0_end = popPilhaCOND(); R0_cond = popPilhaCOND(); printf("jump R0%d\nlabel R0%d\n", R0_cond, R0_end);};
+lacoWhile: WHILE {
+               nmr_jumpFalse = desvio + 1;
+               printf("label R0%d \n", desvio);
+               pushPilhaCOND(desvio++);
+               pushPilhaCOND(desvio);
+               pushPilhaLoop(desvio++);
+           } LPAR logicas {
+               printf("jf %%t%d, R0%d\n", $4, nmr_jumpFalse);
+           } RPAR LCHAVES codigo RCHAVES {
+               int R0_end, R0_cond;
+               popPilhaLoop();
+               R0_end = popPilhaCOND();
+               R0_cond = popPilhaCOND();
+               printf("jump R0%d\nlabel R0%d\n", R0_cond, R0_end);
+           };
 
-// regra para a estrutura condicional 'if' (RESTAURADA)
-If : IF {nmr_jumpFalse = desvio; pushPilhaCOND(desvio++);
-     pushPilhaCOND(desvio++);} LPAR logicas {printf("jf %%t%d, R0%d\n", $4, nmr_jumpFalse);} RPAR LCHAVES codigo RCHAVES else ;
+// regra para a estrutura condicional 'if'
+If: IF {
+        nmr_jumpFalse = desvio;
+        pushPilhaCOND(desvio++);
+        pushPilhaCOND(desvio++);
+    } LPAR logicas {
+        printf("jf %%t%d, R0%d\n", $4, nmr_jumpFalse);
+    } RPAR LCHAVES codigo RCHAVES else ;
 
-// regra para 'else'. (RESTAURADA)
-else : ELSE {dest_else[idx_else++] = popPilhaCOND(); printf("jump R0%d\n", dest_else[idx_else-1]); printf("label R0%d\n", popPilhaCOND());} LCHAVES codigo RCHAVES {printf("label R0%d\n", dest_else[--idx_else]); } 
-     | { int x = popPilhaCOND(); printf("jump R0%d\n", x); printf("label R0%d\nlabel R0%d\n", popPilhaCOND(), x);} %prec "then"
-     ;
+// regra para 'else'
+else: ELSE {
+          dest_else[idx_else++] = popPilhaCOND();
+          printf("jump R0%d\n", dest_else[idx_else - 1]);
+          printf("label R0%d\n", popPilhaCOND());
+      } LCHAVES codigo RCHAVES {
+          printf("label R0%d\n", dest_else[--idx_else]);
+      }
+    | { // Caso IF sem ELSE
+          int x = popPilhaCOND();
+          printf("jump R0%d\n", x);
+          printf("label R0%d\nlabel R0%d\n", popPilhaCOND(), x);
+      } %prec "then"
+    ;
 
 // REGRAS LÓGICAS (SEM AMBIGUIDADE, USANDO PRECEDÊNCIA)
 // O 'logicas' agora é o nível do OR (menor precedência)
-logicas : logicas OR logica_and {
-            printf("or %%t%d, %%t%d, %%t%d \n", t, $1, $3);
-            $$ = t; t++;
-        }
-        | logica_and { $$ = $1; }
-        ;
+logicas: logicas OR logica_and {
+             printf("or %%t%d, %%t%d, %%t%d \n", t, $1, $3);
+             $$ = t;
+             t++;
+         }
+       | logica_and { $$ = $1; }
+       ;
 
 // Novo nível para o AND
-logica_and : logica_and AND logica_not {
-            printf("and %%t%d, %%t%d, %%t%d \n", t, $1, $3);
-            $$ = t; t++;
-        }
-           | logica_not { $$ = $1; }
-           ;
+logica_and: logica_and AND logica_not {
+                printf("and %%t%d, %%t%d, %%t%d \n", t, $1, $3);
+                $$ = t;
+                t++;
+            }
+          | logica_not { $$ = $1; }
+          ;
 
 // Novo nível para o NOT (maior precedência)
-logica_not : NOT logica_not {
-            printf("not %%t%d, %%t%d\n", t, $2); 
-            $$ = t; t++;
-           } %prec NOT
-           | logica_base { $$ = $1; }
-           ;
+logica_not: NOT logica_not {
+                printf("not %%t%d, %%t%d\n", t, $2);
+                $$ = t;
+                t++;
+            } %prec NOT
+          | logica_base { $$ = $1; }
+          ;
 
 // logica_base agora é apenas o "átomo" da expressão
-logica_base : expressao oper expressao { // Uma comparação simples
-            printf("%s %%t%d, %%t%d, %%t%d\n", $2, t, $1, $3); 
-            $$ = t; t++;
-        }
-        | LPAR logicas RPAR { // Uma expressão entre parênteses
-            $$ = $2; 
-        }
-        ;
+logica_base: expressao oper expressao { // Uma comparação simples
+                 printf("%s %%t%d, %%t%d, %%t%d\n", $2, t, $1, $3);
+                 $$ = t;
+                 t++;
+             }
+           | LPAR logicas RPAR { // Uma expressão entre parênteses
+                 $$ = $2;
+             }
+           ;
 
 // regra que converte tokens de operadores de comparacao em strings
-oper : MAIORQUE {$$ = "greater";}       
-     | MENORQUE {$$ = "less";}
-     | IGUAL {$$ = "equal";}
-     | DIFERENTE {$$ = "diff";}
-     | MENORIGUALQUE {$$ = "lesseq";}
-     | MAIORIGUALQUE {$$ = "greatereq";}; 
+oper: MAIORQUE { $$ = "greater"; }
+    | MENORQUE { $$ = "less"; }
+    | IGUAL { $$ = "equal"; }
+    | DIFERENTE { $$ = "diff"; }
+    | MENORIGUALQUE { $$ = "lesseq"; }
+    | MAIORIGUALQUE { $$ = "greatereq"; };
 
 // regra para os operadores de incremento/decremento
-increm : MAISMAIS {$$ = "add";}
-       | MENOSMENOS {$$ = "sub";};
+increm: MAISMAIS { $$ = "add"; }
+      | MENOSMENOS { $$ = "sub"; };
 
 // regras para expressoes aritmeticas, definindo a precedencia
-expressao : expressao MAIS expressao1 {printf("add %%t%d, %%t%d, %%t%d\n", t, $1, $3); $$ = t++;}
-          | expressao MENOS expressao1 {printf("sub %%t%d, %%t%d, %%t%d\n", t, $1, $3); $$ = t++;} 
-          | expressao1 {$$ = $1;};
-    
-expressao1 : expressao1 DIV term {printf("div %%t%d, %%t%d, %%t%d\n", t, $1, $3); $$ = t++;}
-           | expressao1 MULT term {printf("mult %%t%d, %%t%d, %%t%d\n", t, $1, $3); $$ = t++;}
-           | expressao1 MOD term  {printf("mod %%t%d, %%t%d, %%t%d\n", t, $1, $3); $$ = t++;}
-           | term {$$ = $1;};
-    
+expressao: expressao MAIS expressao1 {
+               printf("add %%t%d, %%t%d, %%t%d\n", t, $1, $3);
+               $$ = t++;
+           }
+         | expressao MENOS expressao1 {
+               printf("sub %%t%d, %%t%d, %%t%d\n", t, $1, $3);
+               $$ = t++;
+           }
+         | expressao1 { $$ = $1; };
+
+expressao1: expressao1 DIV term {
+                printf("div %%t%d, %%t%d, %%t%d\n", t, $1, $3);
+                $$ = t++;
+            }
+          | expressao1 MULT term {
+                printf("mult %%t%d, %%t%d, %%t%d\n", t, $1, $3);
+                $$ = t++;
+            }
+          | expressao1 MOD term {
+                printf("mod %%t%d, %%t%d, %%t%d\n", t, $1, $3);
+                $$ = t++;
+            }
+          | term { $$ = $1; };
+
 // regra para os termos de uma expressao (variaveis, numeros...)
-term : ID { int endereco_var = buscaEValidaVariavelSimples($1); printf("mov %%t%d, %%r%d\n", t, endereco_var); $$ = t++;}
-     | NUM  { printf("mov %%t%d, %d\n", t, $1); $$ = t++; }
-     | LPAR expressao RPAR { $$ = $2; }
-     | MENOS ID  { int endereco_var = buscaEValidaVariavelSimples($2); printf("mov %%t%d, %%r%d\n", t, endereco_var); $$ = t++;} 
-     | MENOS NUM { printf("mov %%t%d, %d\n", t, -$2); $$ = t++; }
-     | ID LCOLCHETES expressao RCOLCHETES { int endereco_var = buscaEValidaVetor($1); printf("load %%t%d, %%t%d(%d) \n", t, $3, endereco_var); $$ = t++;} ;
+term: ID {
+          int endereco_var = buscaEValidaVariavelSimples($1);
+          printf("mov %%t%d, %%r%d\n", t, endereco_var);
+          $$ = t++;
+      }
+    | NUM {
+          printf("mov %%t%d, %d\n", t, $1);
+          $$ = t++;
+      }
+    | LPAR expressao RPAR { $$ = $2; }
+    | MENOS ID {
+          int endereco_var = buscaEValidaVariavelSimples($2);
+          printf("mov %%t%d, %%r%d\n", t, endereco_var);
+          $$ = t++;
+      } // Nota: Isso provavelmente deveria ser uma negação (mult por -1)
+    | MENOS NUM {
+          printf("mov %%t%d, %d\n", t, -$2);
+          $$ = t++;
+      }
+    | ID LCOLCHETES expressao RCOLCHETES {
+          int endereco_var = buscaEValidaVetor($1);
+          printf("load %%t%d, %%t%d(%d) \n", t, $3, endereco_var);
+          $$ = t++;
+      }
+    ;
 
 %%
 //rotinas de suporte
+
 //arquivo de entrada usada pelo lexico
 extern FILE *yyin;
 
-
 int main(int argc, char *argv[]) {
     // abre o arquivo "teste.txt" em modo de leitura e o associa a `yyin`.
-    yyin = fopen("teste.txt", "r");       
-  
+    yyin = fopen("teste.txt", "r");
+
     // chama a funcao principal gerada pelo Bison para iniciar a analise sintatica.
     yyparse();
-   
+
     // fecha o arquivo apos a analise
-    fclose(yyin);                    
+    fclose(yyin);
 
     return 0;
 }
 
-// funcao de tratamento de erro 
-void yyerror(const char *s) { 
-    fprintf(stderr,"ERRO SINTATICO! %s\n", s) ;
+// funcao de tratamento de erro
+void yyerror(const char *s) {
+    fprintf(stderr, "ERRO SINTATICO! %s\n", s);
 }
