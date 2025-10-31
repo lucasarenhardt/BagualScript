@@ -38,9 +38,9 @@ int desvio = 0; // contador para os rotulo de desvio
 int dest_else[150]; // vetor para guardar o destino de um else (para gerar salto correto)
 int idx_else = 0; //proxima posicao livre
 
-// FUNÇÔES AUXILIARES
+// FUNCOES AUXILIARES
 
-// FUNÇÃO SEMÂNTICA : Verifica declaracao
+// FUNCAO SEMANTICA: Verifica declaracao
 void verificaDeclaracao(char *nome) {
     if (capturaEnd(nome) != -1) {
         fprintf(stderr, "ERRO SEMANTICO: Variavel '%s' ja foi declarada\n", nome);
@@ -48,37 +48,37 @@ void verificaDeclaracao(char *nome) {
     }
 }
 
-// FUNÇÃO SEMÂNTICA : Verifica se é uma VARIAVEL SIMPLES declarada.
+// FUNCAO SEMANTICA: Verifica se é uma variavel simples declarada
 int buscaEValidaVariavelSimples(char *nome) {
     for (int i = 0; i < idx_entradas; i++) {
         if (strcmp(tabEntrada[i].nome, nome) == 0) { // Achou o nome
-            // VERIFICAÇÃO DE TIPO:
+            // VERIFICACAO DE TIPO:
             if (tabEntrada[i].tipo != ID_VARIAVEL_SIMPLES) {
                 fprintf(stderr, "ERRO SEMANTICO: '%s' é um vetor e foi usado como variavel simples.\n", nome);
                 exit(1);
             }
-            return tabEntrada[i].endereco; // Sucesso!
+            return tabEntrada[i].endereco; 
         }
     }
-    // Se saiu do loop, não achou
+    // Se saiu do loop n achou
     fprintf(stderr, "ERRO SEMANTICO: Variavel '%s' nao foi declarada\n", nome);
     exit(1);
-    return -1; // (só para o compilador não reclamar)
+    return -1;
 }
 
-// FUNÇÃO SEMÂNTICA : Verifica se é um VETOR declarado.
+// FUNCAO SEMANTICA: Verifia se é um vetor declarado
 int buscaEValidaVetor(char *nome) {
     for (int i = 0; i < idx_entradas; i++) {
         if (strcmp(tabEntrada[i].nome, nome) == 0) { // Achou o nome
-            // VERIFICAÇÃO DE TIPO:
+            // VERIFICACAO DE TIPO:
             if (tabEntrada[i].tipo != ID_VETOR) {
                 fprintf(stderr, "ERRO SEMANTICO: '%s' é uma variavel simples e foi usada como vetor.\n", nome);
                 exit(1);
             }
-            return tabEntrada[i].endereco; // Sucesso!
+            return tabEntrada[i].endereco; 
         }
     }
-    // Se saiu do loop, não achou
+    // Se saiu do loop n achou
     fprintf(stderr, "ERRO SEMANTICO: Vetor '%s' nao foi declarado\n", nome);
     exit(1);
     return -1;
@@ -92,10 +92,10 @@ int capturaEnd(char *nome) {
             return tabEntrada[i].endereco;
         }
     }
-    return -1; // caso nao encontre
+    return -1; // caso n encontre
 }
 
-// empilha x na pilhaCOND (desvios condiconais e lacos)
+// empilha x na pilhaCOND
 void pushPilhaCOND(int x) {
     if (topoCond >= 300) { // verifica se a pilha esta cheia
         printf("Pilha de desvios condicionais e lacos cheia\n");
@@ -108,7 +108,7 @@ void pushPilhaCOND(int x) {
 
 // desempilha da pilha COND
 int popPilhaCOND() {
-    if (topoCond <= 0) { // verifica se não esta vazia
+    if (topoCond <= 0) { // verifica se não ta vazia
         printf("Pilha de desvios condicionais e lacos vazia\n");
         return 0;
     }
@@ -148,18 +148,18 @@ int popPilhaLoop() {
 %token <string> ID STRING
 // tokens tipo inteiro
 %token <inteiro> NUM
-// tokens que são simbolos e não possuem valor extra
+// tokens que são simbolos e nao possuem valor extra
 %token PEV FOR WHILE IF ELSE INT PRINT VIRGULA SCAN ERROR ATRIB
 %token MAISMAIS MENOSMENOS MENORQUE MAIORQUE IGUAL DIFERENTE MAIORIGUALQUE MENORIGUALQUE
 %token MAIS MENOS LPAR RPAR RCOLCHETES LCOLCHETES LCHAVES RCHAVES MULT MOD AND NOT OR DIV BREAK APOSTROF
 
-// tipos de retorno dos símbolos não-terminais
+// tiposS de retorno 
 %type <inteiro> expressao term expressao1 logicas logica_and logica_not logica_base
 %type <string> oper increm forVar lacoFor parteIncrem
 
 %define parse.error verbose
 
-// Definições de precedência para remover ambiguidades lógicas
+// Definicoes de precedencia para remover ambiguidades logicas
 %left OR
 %left AND
 %right NOT
@@ -203,54 +203,54 @@ print: expressao { printf("printv %%t%d \n", $1); } VIRGULA print
 
 // regra para atribuicoes e declaracoes de variaveis
 atrib: INT ID ATRIB expressao PEV {
-           // Verificação Semântica (Declaração Duplicada)
+           // verificacao semantica (declaracao duplicada)
            verificaDeclaracao($2);
 
-           // Ação na Tabela (Adiciona com o tipo simples)
+           // acao na tabela (add com o tipo simples)
            tabEntrada[idx_entradas] = (entrada){$2, end, ID_VARIAVEL_SIMPLES};
 
-           // Geração de Código
+           // gera codigo intermediario
            printf("mov %%r%d, %%t%d\n", end, $4);
            idx_entradas++;
            end++;
        }
      | INT ID PEV {
-           // Verificação Semântica (Declaração Duplicada)
+           // verificiacao semantica (declaracao duplicada)
            verificaDeclaracao($2);
 
-           // Ação na Tabela (Adiciona com o tipo simples)
+           // acao na tabela (add com o tipo simples)
            tabEntrada[idx_entradas] = (entrada){$2, end, ID_VARIAVEL_SIMPLES};
            idx_entradas++;
            end++;
        }
      | ID ATRIB expressao PEV { // Ex: x = 5;
-           // Verificação Semântica (Uso de Variável Simples)
-           // Verifica se $1 existe E é uma variável simples.
+           // verificacao semantica (uso de variavel simples)
+           // verifica se $1 existe e eh uma variavel simples
            int endereco_var = buscaEValidaVariavelSimples($1);
 
-           // Geração de Código
+           // gera codigo intermediario
            printf("mov %%r%d, %%t%d\n", endereco_var, $3);
        }
-     | INT ID LCOLCHETES NUM { // Ex: intche v[10];
-           // Verificação Semântica (Declaração Duplicada)
+     | INT ID LCOLCHETES NUM {
+           // verificacao semantica (declaracao duplicada)
            verificaDeclaracao($2);
 
-           // Ação na Tabela (Adiciona com o tipo vetor)
+           // acao na tabela (add com o tipo vetor)
            tabEntrada[idx_entradas] = (entrada){$2, end, ID_VETOR};
            idx_entradas++;
-           end += $4; // Aloca o espaço do vetor
+           end += $4;
        }
        RCOLCHETES PEV
-     | ID LCOLCHETES expressao RCOLCHETES ATRIB expressao PEV { // Ex: v[i] = 10;
-           // Verifica se $1 existe E é um vetor.
+     | ID LCOLCHETES expressao RCOLCHETES ATRIB expressao PEV {
+           // ve se $1 existe e eh um vetor.
            int endereco_var = buscaEValidaVetor($1);
 
-           // $3 é o índice (i), $6 é o valor (10).
+           // $3 é o índice, $6 é o valor
            printf("store %%t%d, %%t%d(%d)\n", $6, $3, endereco_var);
        }
      ;
 
-// regra principal para a estrutura do laco 'for'
+// regra principal para a estrutura do for
 lacoFor: FOR LPAR atrib {
              nmr_jumpFalse = desvio + 1;
              printf("label R0%d\n", desvio);
@@ -267,7 +267,7 @@ lacoFor: FOR LPAR atrib {
              printf("jump R0%d\nlabel R0%d\n", R0_cond, R0_end);
          };
 
-// regra para a condição de parada do 'for'
+// regra para a condição de parada do for
 forVar: ID oper expressao {
             int endereco_var = buscaEValidaVariavelSimples($1);
             printf("%s %%t%d, %%r%d, %%t%d\njf %%t%d, R0%d\n", $2, t, endereco_var, $3, t, nmr_jumpFalse);
@@ -275,11 +275,11 @@ forVar: ID oper expressao {
             t++;
         };
 
-// regra para a parte de incremento do 'for'
+// regra para a parte de incremento do for
 parteIncrem: increm ID { $$ = $2; }
            | ID increm { $$ = $1; };
 
-// regra para a estrutura do laco 'while'
+// regra para o while
 lacoWhile: WHILE {
                nmr_jumpFalse = desvio + 1;
                printf("label R0%d \n", desvio);
@@ -296,7 +296,7 @@ lacoWhile: WHILE {
                printf("jump R0%d\nlabel R0%d\n", R0_cond, R0_end);
            };
 
-// regra para a estrutura condicional 'if'
+// regra para o if
 If: IF {
         nmr_jumpFalse = desvio;
         pushPilhaCOND(desvio++);
@@ -305,7 +305,7 @@ If: IF {
         printf("jf %%t%d, R0%d\n", $4, nmr_jumpFalse);
     } RPAR LCHAVES codigo RCHAVES else ;
 
-// regra para 'else'
+// regra para else
 else: ELSE {
           dest_else[idx_else++] = popPilhaCOND();
           printf("jump R0%d\n", dest_else[idx_else - 1]);
@@ -313,15 +313,15 @@ else: ELSE {
       } LCHAVES codigo RCHAVES {
           printf("label R0%d\n", dest_else[--idx_else]);
       }
-    | { // Caso IF sem ELSE
+    | { // caso IF sem ELSE
           int x = popPilhaCOND();
           printf("jump R0%d\n", x);
           printf("label R0%d\nlabel R0%d\n", popPilhaCOND(), x);
       } %prec "then"
     ;
 
-// REGRAS LÓGICAS (SEM AMBIGUIDADE, USANDO PRECEDÊNCIA)
-// O 'logicas' agora é o nível do OR (menor precedência)
+// REGRAS LOGICAS
+
 logicas: logicas OR logica_and {
              printf("or %%t%d, %%t%d, %%t%d \n", t, $1, $3);
              $$ = t;
@@ -330,7 +330,6 @@ logicas: logicas OR logica_and {
        | logica_and { $$ = $1; }
        ;
 
-// Novo nível para o AND
 logica_and: logica_and AND logica_not {
                 printf("and %%t%d, %%t%d, %%t%d \n", t, $1, $3);
                 $$ = t;
@@ -339,7 +338,6 @@ logica_and: logica_and AND logica_not {
           | logica_not { $$ = $1; }
           ;
 
-// Novo nível para o NOT (maior precedência)
 logica_not: NOT logica_not {
                 printf("not %%t%d, %%t%d\n", t, $2);
                 $$ = t;
@@ -348,13 +346,12 @@ logica_not: NOT logica_not {
           | logica_base { $$ = $1; }
           ;
 
-// logica_base agora é apenas o "átomo" da expressão
-logica_base: expressao oper expressao { // Uma comparação simples
+logica_base: expressao oper expressao { // uma comparacao simples
                  printf("%s %%t%d, %%t%d, %%t%d\n", $2, t, $1, $3);
                  $$ = t;
                  t++;
              }
-           | LPAR logicas RPAR { // Uma expressão entre parênteses
+           | LPAR logicas RPAR { // uma expr entre parenteses
                  $$ = $2;
              }
            ;
@@ -411,7 +408,7 @@ term: ID {
           int endereco_var = buscaEValidaVariavelSimples($2);
           printf("mov %%t%d, %%r%d\n", t, endereco_var);
           $$ = t++;
-      } // Nota: Isso provavelmente deveria ser uma negação (mult por -1)
+      }
     | MENOS NUM {
           printf("mov %%t%d, %d\n", t, -$2);
           $$ = t++;
